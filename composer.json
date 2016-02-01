@@ -1,0 +1,14 @@
+{
+    "name": "xenophy/fuel-ext-direct",
+    "description": "FuelPHP Sencha Ext JS direct provider",
+    "type": "fuel-package",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kazuhiro Kotsutsumi",
+            "email": "kotsutsumi@xenophy.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
