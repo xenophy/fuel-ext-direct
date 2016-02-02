@@ -24,7 +24,6 @@ class Controller_Extdirect extends Controller {
             header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept');
         }
 
-
         $isForm = false;
         $isUpload = false;
 
