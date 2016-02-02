@@ -19,7 +19,7 @@ You should add **extdirect** to 'always_load' -> 'packages' like a following
 'packages'  => array(
     'orm',
     'auth',
-    'extdirect',
+    'fuel-ext-direct',
 ),
 ```
 
