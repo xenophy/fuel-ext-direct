@@ -11,7 +11,7 @@ composer update
 
 ### Add setting to config.php
 
-You should add **extdirect** to 'always_load' -> 'packages' like a following 
+You should add **fuel-ext-direct** to 'always_load' -> 'packages' like a following 
 
 ```
 'packages'  => array(
