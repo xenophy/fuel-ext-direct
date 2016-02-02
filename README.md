@@ -2,8 +2,6 @@
 
 FuelPHP Sencha Ext JS direct provider
 
-registration to packagist not yet.
-
 ## Install
 
 ```
