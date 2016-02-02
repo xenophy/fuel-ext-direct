@@ -24,16 +24,124 @@ class Controller_Extdirect extends Controller {
             header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept');
         }
 
-        exit("direct2 action_index");
+
+        $isForm = false;
+        $isUpload = false;
+
+        $post_data = file_get_contents("php://input");
+
+        if ($post_data) {
+
+            header('Content-Type: text/javascript');
+            $data = json_decode($post_data);
+
+        } else if (isset($_POST[ 'extAction' ])) { // form post
+
+            $isForm = true;
+            $isUpload = $_POST[ 'extUpload' ] == 'true';
+            $data = new BogusAction();
+            $data->action = $_POST[ 'extAction' ];
+            $data->method = $_POST[ 'extMethod' ];
+            $data->tid = isset($_POST[ 'extTID' ]) ? $_POST[ 'extTID' ] : null;
+            $data->data = array($_POST, $_FILES);
+
+        } else {
+            die('Invalid request.');
+        }
+
+        $response = null;
+
+        if (is_array($data)) {
+
+            $response = array();
+
+            foreach ($data as $d) {
+                $response[] = $this->doRpc($d);
+            }
+
+        } else {
+
+            $response = $this->doRpc($data);
+
+        }
+
+        if ($isForm && $isUpload) {
+
+            echo '<html><body><textarea>';
+            echo json_encode($response);
+            echo '</textarea></body></html>';
+
+        } else {
+
+            echo json_encode($response);
+
+        }
+
     }
 
     // }}}
-    // {{{ action_api
+    // {{{ doRpc
 
-    /**
-     * Return Ext Direct Definitions
-     */
-    public function action_api() {
+    private function doRpc($cdata) {
+
+        $API = $this->get_specs();
+
+        // get direct classes directory name
+        $classes_dirname = \Config::get('extdirect.classes_dirname', 'direct');
+
+        // get class name root (default is 'Direct' by config)
+        $cls_name_root = ucfirst(strtolower($classes_dirname));
+
+        try {
+
+            if (!isset($API[ $cdata->action ])) {
+                throw new Exception('Call to undefined action: ' . $cdata->action);
+            }
+
+            $action = $cdata->action;
+            $a = $API[ $action ];
+
+            $method = $cdata->method;
+            $mdef = $a[ 'methods' ][ $method ];
+
+            if (!$mdef) {
+                throw new Exception("Call to undefined method: $method " .
+                    "in action $action");
+            }
+
+            $r = array(
+                'type' => 'rpc',
+                'tid' => $cdata->tid,
+                'action' => $action,
+                'method' => $method
+            );
+
+            $cls = $cls_name_root . '_' . $action;
+
+            $o = new $cls();
+
+            if (isset($mdef[ 'len' ])) {
+                $params = isset($cdata->data) && is_array($cdata->data) ? $cdata->data : array();
+            } else {
+                $params = array($cdata->data);
+            }
+
+            //array_push($params, $cdata->metadata);
+
+            $r[ 'result' ] = call_user_func_array(array($o, $method), $params);
+        } catch (Exception $e) {
+            $r[ 'type' ] = 'exception';
+            $r[ 'message' ] = $e->getMessage();
+            $r[ 'where' ] = $e->getTraceAsString();
+        }
+
+        return $r;
+    }
+
+    // }}}
+    // {{{ get_specs
+
+    private function get_specs() {
 
         // load config
         \Config::load('extdirect', true);
@@ -86,58 +194,71 @@ class Controller_Extdirect extends Controller {
 
                     $doc = $method->getDocComment();
 
-                    if(!!preg_match('/@remotable/', $doc)) {
+                    if (!!preg_match('/@remotable/', $doc)) {
 
                         $cfg = array(
                             'name' => $method->name,
                             'len' => $method->getNumberOfParameters()
                         );
 
-                        if(!!preg_match('/@formHandler/', $doc)) {
-                            $cfg['formHandler'] = true;
+                        if (!!preg_match('/@formHandler/', $doc)) {
+                            $cfg[ 'formHandler' ] = true;
                         }
 
-                        $api_methods[$method->name] = $cfg;
+                        $api_methods[ $method->name ] = $cfg;
 
                     }
                 }
             }
 
             if (sizeof($api_methods) > 0) {
-                $API[$cls_name_child] = array('methods' => $api_methods);
+                $API[ $cls_name_child ] = array('methods' => $api_methods);
             }
 
         }
 
+        return $API;
+    }
+
+    // }}}
+    // {{{ action_api
+
+    /**
+     * Return Ext Direct Definitions
+     */
+    public function action_api() {
+
+        $API = $this->get_specs();
+
         $actions = array();
 
-        foreach ($API as $aname=>&$a) {
+        foreach ($API as $aname => &$a) {
             $methods = array();
-            foreach ($a['methods'] as $mname=>&$m) {
-                if (isset($m['len'])) {
+            foreach ($a[ 'methods' ] as $mname => &$m) {
+                if (isset($m[ 'len' ])) {
                     $md = array(
-                        'name'=>$mname,
-                        'len'=>$m['len']
+                        'name' => $mname,
+                        'len' => $m[ 'len' ]
                     );
                 } else {
                     $md = array(
-                        'name'=>$mname,
-                        'params'=>$m['params']
+                        'name' => $mname,
+                        'params' => $m[ 'params' ]
                     );
                 }
-                if (isset($m['formHandler']) && $m['formHandler']) {
-                    $md['formHandler'] = true;
+                if (isset($m[ 'formHandler' ]) && $m[ 'formHandler' ]) {
+                    $md[ 'formHandler' ] = true;
                 }
                 $methods[] = $md;
             }
-            $actions[$aname] = $methods;
+            $actions[ $aname ] = $methods;
         }
 
         $cfg = array(
             //'url'       => $route,
-            'url'       => 'http://localhost/~firebird_management/direct',
-            'type'      => 'remoting',
-            'actions'   => $actions
+            'url' => 'http://localhost/~firebird_management/direct',
+            'type' => 'remoting',
+            'actions' => $actions
         );
 
         header('Content-Type: text/javascript');
@@ -226,6 +347,33 @@ class Controller_Extdirect extends Controller {
 
 }
 
+// }}}
+// {{{ BogusAction
+
+class BogusAction {
+
+    // {{{ action
+
+    public $action;
+
+    // }}}
+    // {{{ method
+
+    public $method;
+
+    // }}}
+    // {{{ data
+
+    public $data;
+
+    // }}}
+    // {{{ tid
+
+    public $tid;
+
+    // }}}
+
+}
 // }}}
 
 /*
