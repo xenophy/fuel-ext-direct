@@ -16,6 +16,14 @@ class Controller_Extdirect extends Controller {
      * Extcute Ext Direct functions
      */
     public function action_index() {
+
+        if (Input::server('HTTP_HOST') === 'localhost') {
+
+            // for local development
+            header('Access-Control-Allow-Origin: *');
+            header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept');
+        }
+
         exit("direct2 action_index");
     }
 
@@ -126,7 +134,8 @@ class Controller_Extdirect extends Controller {
         }
 
         $cfg = array(
-            'url'       => $route,
+            //'url'       => $route,
+            'url'       => 'http://localhost/~firebird_management/direct',
             'type'      => 'remoting',
             'actions'   => $actions
         );
