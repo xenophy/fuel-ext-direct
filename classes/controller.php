@@ -81,6 +81,7 @@ class Controller_Extdirect extends Controller {
                     if(!!preg_match('/@remotable/', $doc)) {
 
                         $cfg = array(
+                            'name' => $method->name,
                             'len' => $method->getNumberOfParameters()
                         );
 
@@ -100,10 +101,34 @@ class Controller_Extdirect extends Controller {
 
         }
 
+        $actions = array();
+
+        foreach ($API as $aname=>&$a) {
+            $methods = array();
+            foreach ($a['methods'] as $mname=>&$m) {
+                if (isset($m['len'])) {
+                    $md = array(
+                        'name'=>$mname,
+                        'len'=>$m['len']
+                    );
+                } else {
+                    $md = array(
+                        'name'=>$mname,
+                        'params'=>$m['params']
+                    );
+                }
+                if (isset($m['formHandler']) && $m['formHandler']) {
+                    $md['formHandler'] = true;
+                }
+                $methods[] = $md;
+            }
+            $actions[$aname] = $methods;
+        }
+
         $cfg = array(
             'url'       => $route,
             'type'      => 'remoting',
-            'actions'   => $API
+            'actions'   => $actions
         );
 
         header('Content-Type: text/javascript');
