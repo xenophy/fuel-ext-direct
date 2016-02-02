@@ -6,7 +6,6 @@ FuelPHP Sencha Ext JS direct provider
 
 ```
 composer require xenophy/fuel-ext-direct
-composer update
 ```
 
 ### Add setting to config.php
