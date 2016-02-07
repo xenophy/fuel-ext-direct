@@ -229,6 +229,9 @@ class Controller_Extdirect extends Controller {
 
         $API = $this->get_specs();
 
+        // get route
+        $route = \Config::get('extdirect.route', 'direct');
+
         $actions = array();
 
         foreach ($API as $aname => &$a) {
@@ -255,7 +258,6 @@ class Controller_Extdirect extends Controller {
 
         $cfg = array(
             'url'       => $route,
-            //'url' => 'http://localhost/~firebird_management/direct',
             'type' => 'remoting',
             'actions' => $actions
         );
