@@ -9,6 +9,7 @@
  * http://www.xenophy-entertainment.com
  */
 return array(
+    'url'               => '/direct',
     'route'             => 'direct',
     'classes_dirname'   => 'direct'
 );

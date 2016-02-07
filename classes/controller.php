@@ -230,7 +230,7 @@ class Controller_Extdirect extends Controller {
         $API = $this->get_specs();
 
         // get route
-        $route = \Config::get('extdirect.route', 'direct');
+        $url = \Config::get('extdirect.url', '/direct');
 
         $actions = array();
 
@@ -257,7 +257,7 @@ class Controller_Extdirect extends Controller {
         }
 
         $cfg = array(
-            'url'       => $route,
+            'url' => $url,
             'type' => 'remoting',
             'actions' => $actions
         );
