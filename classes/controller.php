@@ -254,8 +254,8 @@ class Controller_Extdirect extends Controller {
         }
 
         $cfg = array(
-            //'url'       => $route,
-            'url' => 'http://localhost/~firebird_management/direct',
+            'url'       => $route,
+            //'url' => 'http://localhost/~firebird_management/direct',
             'type' => 'remoting',
             'actions' => $actions
         );
