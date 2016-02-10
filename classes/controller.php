@@ -22,7 +22,13 @@ class Controller_Extdirect extends Controller {
             // for local development
             $url = parse_url(Input::server('HTTP_ORIGIN'));
             header('Access-Control-Allow-Credentials: true');
-            header('Access-Control-Allow-Origin: http://localhost:' . $url['port']);
+
+            if (isset($url['port'])) {
+                header('Access-Control-Allow-Origin: http://localhost:' . $url['port']);
+            } else {
+                header('Access-Control-Allow-Origin: http://localhost');
+            }
+
             header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept');
             header('Access-Control-Allow-Methods: GET, PUT, POST, DELETE, HEAD, OPTIONS');
 
