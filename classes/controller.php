@@ -20,8 +20,12 @@ class Controller_Extdirect extends Controller {
         if (Input::server('HTTP_HOST') === 'localhost') {
 
             // for local development
-            header('Access-Control-Allow-Origin: *');
+            $url = parse_url(Input::server('HTTP_ORIGIN'));
+            header('Access-Control-Allow-Credentials: true');
+            header('Access-Control-Allow-Origin: http://localhost:' . $url['port']);
             header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept');
+            header('Access-Control-Allow-Methods: GET, PUT, POST, DELETE, HEAD, OPTIONS');
+
         }
 
         $isForm = false;
