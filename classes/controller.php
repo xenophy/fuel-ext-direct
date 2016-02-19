@@ -23,8 +23,8 @@ class Controller_Extdirect extends Controller {
             $url = parse_url(Input::server('HTTP_ORIGIN'));
             header('Access-Control-Allow-Credentials: true');
 
-            if (isset($url['port'])) {
-                header('Access-Control-Allow-Origin: http://localhost:' . $url['port']);
+            if (isset($url[ 'port' ])) {
+                header('Access-Control-Allow-Origin: http://localhost:' . $url[ 'port' ]);
             } else {
                 header('Access-Control-Allow-Origin: http://localhost');
             }
@@ -39,12 +39,7 @@ class Controller_Extdirect extends Controller {
 
         $post_data = file_get_contents("php://input");
 
-        if ($post_data) {
-
-            header('Content-Type: text/javascript');
-            $data = json_decode($post_data);
-
-        } else if (isset($_POST[ 'extAction' ])) { // form post
+        if (isset($_POST[ 'extAction' ])) { // form post
 
             $isForm = true;
             $isUpload = $_POST[ 'extUpload' ] == 'true';
@@ -53,6 +48,11 @@ class Controller_Extdirect extends Controller {
             $data->method = $_POST[ 'extMethod' ];
             $data->tid = isset($_POST[ 'extTID' ]) ? $_POST[ 'extTID' ] : null;
             $data->data = array($_POST, $_FILES);
+
+        } else if ($post_data) {
+
+            header('Content-Type: text/javascript');
+            $data = json_decode($post_data);
 
         } else {
             die('Invalid request.');
